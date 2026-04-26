@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI SaaS STUDIO · mTarget</title>
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='4' y='4' width='32' height='26' rx='4' fill='none' stroke='%23ffd84d' stroke-width='3'/><circle cx='13' cy='13' r='2.6' fill='%23ffd84d'/><path d='M7 26 L16 17 L23 22 L30 15 L33 18' fill='none' stroke='%23ffd84d' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round'/><rect x='28' y='34' width='32' height='26' rx='4' fill='none' stroke='%235d3dff' stroke-width='3'/><polygon points='38,42 50,47 38,52' fill='%235d3dff'/></svg>" />
+<link rel="stylesheet" href="styles.css" />
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#0b0d12" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="STUDIO mTarget" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="42" height="42">
+        <!-- Картинка слева-сверху -->
+        <rect x="4" y="4" width="32" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        <circle cx="13" cy="13" r="2.4" fill="currentColor"/>
+        <path d="M7 26 L16 17 L23 22 L30 15 L33 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Видео справа-снизу -->
+        <rect x="28" y="34" width="32" height="26" rx="4" fill="none" stroke="#7c5cff" stroke-width="2.5"/>
+        <polygon points="38,42 50,47 38,52" fill="#7c5cff"/>
+      </svg>
+    </span>
+    <div>
+      <h1>AI SaaS <span class="brand-emph">STUDIO</span> · mTarget</h1>
+      <p class="sub">картинки · видео · архвиз · апскейл</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button id="settingsBtn" class="ghost" type="button">⚙ API-ключ</button>
+    <button id="clearHistoryBtn" class="ghost" type="button">Очистить историю</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-tab="t2i" role="tab">🎨 Картинка из текста</button>
+  <button class="tab" data-tab="edit" role="tab">✏️ Редактирование</button>
+  <button class="tab" data-tab="arch" role="tab">🏛 Архитектура и дизайн</button>
+  <button class="tab" data-tab="t2v" role="tab">🎬 Видео из текста</button>
+  <button class="tab" data-tab="i2v" role="tab">🎞 Видео из кадра</button>
+  <button class="tab" data-tab="ups" role="tab">🔍 Апскейл</button>
+</nav>
+
+<main>
+  <!-- ========= TEXT → IMAGE ========= -->
+  <section class="panel active" data-panel="t2i">
+    <div class="panel-grid">
+      <div class="form">
+        <h2>Картинка из текста</h2>
+
+        <label>Модель</label>
+        <select id="t2i_model">
+          <option value="google:4@3" selected>Nano Banana 2 (Gemini 3.1 Flash Image)</option>
+          <option value="google:4@2">Nano Banana Pro</option>
+        </select>
+
+        <label>Промпт</label>
+        <textarea id="t2i_prompt" rows="5" placeholder="Опиши, что должно быть на картинке. Можно по-русски."></textarea>
+
+        <label>Разрешение (Nano Banana работает по пресетам)</label>
+        <select id="t2i_resolution">
+          <option value="512x512">512×512 (быстро и дёшево)</option>
+          <option value="1024x1024" selected>1K · 1024×1024</option>
+          <option value="2048x2048">2K · 2048×2048</option>
+          <option value="4096x4096">4K · 4096×4096</option>
+        </select>
+
+        <div class="row three">
+          <div>
+            <label>Количество (1–20)</label>
+            <input type="number" id="t2i_n" min="1" max="20" value="1" />
+          </div>
+          <div>
+            <label>Формат</label>
+            <select id="t2i_format">
+              <option>PNG</option><option selected>JPG</option><option>WEBP</option>
+            </select>
+          </div>
+          <div>
+            <label>Seed (опционально)</label>
+            <input type="number" id="t2i_seed" min="0" placeholder="для повтора результата" />
+          </div>
+        </div>
+
+        <details class="adv">
+          <summary>Дополнительно (Google: thinking, safety, web search, system prompt)</summary>
+          <div class="adv-body">
+            <label>Режим «thinking»</label>
+            <select id="t2i_thinking">
+              <option value="">— по умолчанию —</option>
+              <option value="thinking">thinking</option>
+              <option value="instant">instant</option>
+            </select>
+
+            <div class="row two">
+              <div>
+                <label>Temperature (0–1)</label>
+                <input type="number" id="t2i_temp" min="0" max="1" step="0.05" placeholder="напр. 0.4" />
+              </div>
+              <div>
+                <label>Top P (0–1)</label>
+                <input type="number" id="t2i_topp" min="0" max="1" step="0.05" placeholder="напр. 0.9" />
+              </div>
+            </div>
+
+            <div class="row two">
+              <div>
+                <label>Web Search</label>
+                <select id="t2i_websearch"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+              </div>
+              <div>
+                <label>Image Search (Nano Banana 2)</label>
+                <select id="t2i_imagesearch"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+              </div>
+            </div>
+
+            <label>Safety tolerance</label>
+            <select id="t2i_safety">
+              <option value="" selected>— по умолчанию —</option>
+              <option value="block_none">block_none</option>
+              <option value="block_few">block_few</option>
+              <option value="block_some">block_some</option>
+              <option value="block_most">block_most</option>
+              <option value="block_all">block_all</option>
+            </select>
+
+            <label>System prompt (до 50000 символов)</label>
+            <textarea id="t2i_sys" rows="2" placeholder="Например: «выдавай только реалистичные фотографии без артефактов»"></textarea>
+
+            <label>Качество JPG/WEBP (20–99)</label>
+            <input type="number" id="t2i_quality" min="20" max="99" value="95" />
+          </div>
+        </details>
+
+        <button class="primary" id="t2i_run">Сгенерировать</button>
+        <p class="hint" id="t2i_hint"></p>
+
+        <div class="cost-box" id="t2i_cost">
+          <div class="cost-row"><span>Прогноз стоимости</span><strong id="t2i_cost_est">—</strong></div>
+          <div class="cost-row"><span>Фактически списано</span><strong id="t2i_cost_real">—</strong></div>
+          <p class="cost-note" id="t2i_cost_note"></p>
+        </div>
+      </div>
+      <div class="results" id="t2i_results"></div>
+    </div>
+  </section>
+
+  <!-- ========= IMAGE → IMAGE ========= -->
+  <section class="panel" data-panel="edit">
+    <div class="panel-grid">
+      <div class="form">
+        <h2>Редактирование картинки по референсу</h2>
+
+        <label>Модель</label>
+        <select id="edit_model">
+          <option value="google:4@3" selected>Nano Banana 2</option>
+          <option value="google:4@2">Nano Banana Pro</option>
+        </select>
+
+        <label>Референсные картинки (до 14)</label>
+        <div class="dropzone" id="edit_drop">
+          <input type="file" id="edit_files" accept="image/*" multiple hidden />
+          <p>Перетащи файлы сюда или <button type="button" class="link" id="edit_pick">выбери</button></p>
+          <div class="thumbs" id="edit_thumbs"></div>
+        </div>
+
+        <label>Что сделать с картинками</label>
+        <textarea id="edit_prompt" rows="5" placeholder="Например: «замени фон на закатное небо, оставь людей как есть»"></textarea>
+
+        <label>Разрешение</label>
+        <select id="edit_resolution">
+          <option value="512x512">512×512</option>
+          <option value="1024x1024" selected>1K · 1024×1024</option>
+          <option value="2048x2048">2K · 2048×2048</option>
+          <option value="4096x4096">4K · 4096×4096</option>
+        </select>
+
+        <div class="row three">
+          <div>
+            <label>Количество (1–20)</label>
+            <input type="number" id="edit_n" min="1" max="20" value="1" />
+          </div>
+          <div>
+            <label>Формат</label>
+            <select id="edit_format">
+              <option>PNG</option><option selected>JPG</option><option>WEBP</option>
+            </select>
+          </div>
+          <div>
+            <label>Seed (опционально)</label>
+            <input type="number" id="edit_seed" min="0" placeholder="для повтора результата" />
+          </div>
+        </div>
+
+        <details class="adv">
+          <summary>Дополнительно</summary>
+          <div class="adv-body">
+            <label>Режим «thinking»</label>
+            <select id="edit_thinking">
+              <option value="">— по умолчанию —</option>
+              <option value="thinking">thinking</option>
+              <option value="instant">instant</option>
+            </select>
+
+            <div class="row two">
+              <div>
+                <label>Temperature (0–1)</label>
+                <input type="number" id="edit_temp" min="0" max="1" step="0.05" />
+              </div>
+              <div>
+                <label>Top P (0–1)</label>
+                <input type="number" id="edit_topp" min="0" max="1" step="0.05" />
+              </div>
+            </div>
+
+            <div class="row two">
+              <div>
+                <label>Web Search</label>
+                <select id="edit_websearch"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+              </div>
+              <div>
+                <label>Image Search (Nano Banana 2)</label>
+                <select id="edit_imagesearch"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+              </div>
+            </div>
+
+            <label>Safety tolerance</label>
+            <select id="edit_safety">
+              <option value="" selected>— по умолчанию —</option>
+              <option value="block_none">block_none</option>
+              <option value="block_few">block_few</option>
+              <option value="block_some">block_some</option>
+              <option value="block_most">block_most</option>
+              <option value="block_all">block_all</option>
+            </select>
+
+            <label>System prompt</label>
+            <textarea id="edit_sys" rows="2"></textarea>
+
+            <label>Качество JPG/WEBP (20–99)</label>
+            <input type="number" id="edit_quality" min="20" max="99" value="95" />
+          </div>
+        </details>
+
+        <button class="primary" id="edit_run">Запустить</button>
+        <p class="hint" id="edit_hint"></p>
+
+        <div class="cost-box" id="edit_cost">
+          <div class="cost-row"><span>Прогноз стоимости</span><strong id="edit_cost_est">—</strong></div>
+          <div class="cost-row"><span>Фактически списано</span><strong id="edit_cost_real">—</strong></div>
+          <p class="cost-note" id="edit_cost_note"></p>
+        </div>
+      </div>
+      <div class="results" id="edit_results"></div>
+    </div>
+  </section>
+
+  <!-- ========= ARCH ========= -->
+  <section class="panel" data-panel="arch">
+    <div class="panel-grid">
+      <div class="form">
+        <h2>Архитектура и интерьеры</h2>
+        <p class="muted">Подборка моделей для архвиза, интерьеров, экстерьеров, рендеров, развёрток и планов. Можно работать с нуля по тексту или загрузить эскиз/фото для редактирования (Flux Kontext, Seedream 4, Nano Banana).</p>
+
+        <label>Модель</label>
+        <select id="arch_model">
+          <optgroup label="Фотореализм / архвиз">
+            <option value="bfl:2@2" selected>FLUX 1.1 [pro] Ultra · флагман для фотореалистичных рендеров</option>
+            <option value="bfl:2@1">FLUX 1.1 [pro] · быстрее, чуть проще</option>
+          </optgroup>
+          <optgroup label="Редактирование (поддерживает референсы, до 2)">
+            <option value="bfl:4@1">FLUX Kontext [max] · смена стиля, материалов, времени суток</option>
+            <option value="bfl:3@1">FLUX Kontext [pro] · быстрее Max, тот же сценарий</option>
+            <option value="google:4@3">Nano Banana 2 · аккуратное редактирование сцен</option>
+          </optgroup>
+          <optgroup label="Многовидовые проекты / эскизы">
+            <option value="bytedance:5@0">Seedream 4 · мульти-вью, скетч → рендер, развёртки</option>
+          </optgroup>
+          <optgroup label="Чертежи, подписи, типографика">
+            <option value="ideogram:4@1">Ideogram 3 · точные подписи, размеры, легенды</option>
+            <option value="recraft:v4-pro@0">Recraft V4 Pro · векторные/изометричные чертежи</option>
+            <option value="recraft:v4@0">Recraft V4 · базовая версия</option>
+          </optgroup>
+        </select>
+        <p class="hint muted" id="arch_model_hint"></p>
+
+        <label>Референсы (до 14, у Flux Kontext — до 2)</label>
+        <div class="dropzone" id="arch_drop">
+          <input type="file" id="arch_files" accept="image/*" multiple hidden />
+          <p>Эскиз, план, фото интерьера. <button type="button" class="link" id="arch_pick">выбрать</button>. Работают с Flux Kontext / Seedream 4 / Nano Banana.</p>
+          <div class="thumbs" id="arch_thumbs"></div>
+        </div>
+
+        <label>Промпт</label>
+        <textarea id="arch_prompt" rows="6" placeholder="Например: «современная гостиная в скандинавском стиле, дубовый паркет, бетонный потолок, мягкое утреннее освещение из больших окон, фотореалистичный архитектурный рендер, 8K»"></textarea>
+
+        <label>Негативный промпт (опционально)</label>
+        <textarea id="arch_neg" rows="2" placeholder="Чего быть не должно"></textarea>
+
+        <div class="row two">
+          <div>
+            <label>Ширина</label>
+            <select id="arch_width">
+              <option>768</option><option>1024</option><option>1344</option><option selected>1440</option><option>1536</option><option>1920</option><option>2048</option><option>2560</option><option>2752</option>
+            </select>
+          </div>
+          <div>
+            <label>Высота</label>
+            <select id="arch_height">
+              <option>768</option><option>1024</option><option selected>1440</option><option>1536</option><option>1920</option><option>2048</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row three">
+          <div>
+            <label>Количество (1–20)</label>
+            <input type="number" id="arch_n" min="1" max="20" value="2" />
+          </div>
+          <div>
+            <label>Пресеты</label>
+            <select id="arch_ar">
+              <option value="">— ручной размер —</option>
+              <option value="1920x1080">16:9 широкий рендер (1920×1080)</option>
+              <option value="2048x1152" selected>16:9 интерьерный (2048×1152)</option>
+              <option value="1536x1024">3:2 фото (1536×1024)</option>
+              <option value="1024x1536">2:3 портрет / экстерьер</option>
+              <option value="2048x2048">1:1 квадрат / развёртка</option>
+              <option value="2560x1440">2.5K панорама</option>
+              <option value="2752x1536">≈4 МП Ultra</option>
+            </select>
+          </div>
+          <div>
+            <label>Seed</label>
+            <div class="seed-row">
+              <input type="number" id="arch_seed" min="0" placeholder="опционально" />
+              <button class="ghost icon-btn" type="button" id="arch_seed_rand" title="Случайный seed">🎲</button>
+            </div>
+          </div>
+        </div>
+
+        <details class="adv">
+          <summary>Расширенные настройки модели</summary>
+          <div class="adv-body">
+            <!-- BFL params -->
+            <div class="adv-group" data-models="bfl:2@1,bfl:2@2,bfl:3@1,bfl:4@1">
+              <p class="adv-title">FLUX (BFL)</p>
+              <div class="row two">
+                <div>
+                  <label>Prompt upsampling</label>
+                  <select id="arch_bfl_upsample"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+                </div>
+                <div>
+                  <label>Safety tolerance (0–6)</label>
+                  <input type="number" id="arch_bfl_safety" min="0" max="6" step="1" value="2" />
+                </div>
+              </div>
+              <div class="row two">
+                <div data-models="bfl:2@2">
+                  <label>Raw mode (Ultra)</label>
+                  <select id="arch_bfl_raw"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seedream -->
+            <div class="adv-group" data-models="bytedance:5@0">
+              <p class="adv-title">Seedream 4</p>
+              <label>maxSequentialImages (1–15, суммарно с референсами ≤ 15)</label>
+              <input type="number" id="arch_seed_seq" min="1" max="15" step="1" value="1" />
+            </div>
+
+            <!-- Ideogram -->
+            <div class="adv-group" data-models="ideogram:4@1">
+              <p class="adv-title">Ideogram 3</p>
+              <div class="row two">
+                <div>
+                  <label>Magic Prompt</label>
+                  <select id="arch_ideo_magic">
+                    <option value="AUTO" selected>AUTO</option><option value="ON">ON</option><option value="OFF">OFF</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Rendering speed</label>
+                  <select id="arch_ideo_speed">
+                    <option value="DEFAULT" selected>DEFAULT</option><option value="TURBO">TURBO</option><option value="QUALITY">QUALITY</option>
+                  </select>
+                </div>
+              </div>
+              <label>Style type</label>
+              <select id="arch_ideo_style">
+                <option value="AUTO" selected>AUTO</option>
+                <option value="GENERAL">GENERAL</option>
+                <option value="REALISTIC">REALISTIC</option>
+                <option value="DESIGN">DESIGN</option>
+                <option value="RENDER_3D">RENDER_3D</option>
+                <option value="ANIME">ANIME</option>
+                <option value="ILLUSTRATED">ILLUSTRATED</option>
+              </select>
+            </div>
+
+            <!-- Recraft -->
+            <div class="adv-group" data-models="recraft:v4@0,recraft:v4-pro@0">
+              <p class="adv-title">Recraft V4</p>
+              <label>Цвет фона (для иконок/иллюстраций без фона)</label>
+              <input type="color" id="arch_recraft_bg" value="#ffffff" />
+              <label class="muted-label"><input type="checkbox" id="arch_recraft_bg_use" /> применять цвет фона</label>
+            </div>
+
+            <!-- Google -->
+            <div class="adv-group" data-models="google:4@3">
+              <p class="adv-title">Nano Banana 2</p>
+              <div class="row two">
+                <div>
+                  <label>Web Search</label>
+                  <select id="arch_g_websearch"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+                </div>
+                <div>
+                  <label>Image Search</label>
+                  <select id="arch_g_imagesearch"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+                </div>
+              </div>
+              <label>Safety tolerance</label>
+              <select id="arch_g_safety">
+                <option value="" selected>— по умолчанию —</option>
+                <option value="block_none">block_none</option>
+                <option value="block_few">block_few</option>
+                <option value="block_some">block_some</option>
+                <option value="block_most">block_most</option>
+                <option value="block_all">block_all</option>
+              </select>
+            </div>
+
+            <!-- Common -->
+            <p class="adv-title">Общие</p>
+            <div class="row two">
+              <div>
+                <label>Формат</label>
+                <select id="arch_format">
+                  <option>PNG</option><option selected>JPG</option><option>WEBP</option>
+                </select>
+              </div>
+              <div>
+                <label>Качество (20–99)</label>
+                <input type="number" id="arch_quality" min="20" max="99" value="95" />
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <button class="primary" id="arch_run">Сгенерировать</button>
+        <p class="hint" id="arch_hint"></p>
+
+        <div class="cost-box" id="arch_cost">
+          <div class="cost-row"><span>Прогноз стоимости</span><strong id="arch_cost_est">—</strong></div>
+          <div class="cost-row"><span>Фактически списано</span><strong id="arch_cost_real">—</strong></div>
+          <p class="cost-note" id="arch_cost_note"></p>
+        </div>
+      </div>
+      <div class="results" id="arch_results"></div>
+    </div>
+  </section>
+
+  <!-- ========= TEXT → VIDEO ========= -->
+  <section class="panel" data-panel="t2v">
+    <div class="panel-grid">
+      <div class="form">
+        <h2>Видео из текста · Kling и Seedance</h2>
+
+        <label>Модель</label>
+        <select id="t2v_model">
+          <optgroup label="Kling">
+            <option value="klingai:kling-video@3-standard" selected>Kling 3.0 Standard · 1080p</option>
+            <option value="klingai:kling-video@3-4k">Kling 3.0 4K</option>
+            <option value="klingai:kling-video@o3-standard">Kling O3 Standard · HD</option>
+            <option value="klingai:kling-video@o3-4k">Kling O3 4K</option>
+            <option value="klingai:kling-video@2-6-standard">Kling 2.6 Standard</option>
+          </optgroup>
+          <optgroup label="ByteDance Seedance">
+            <option value="bytedance:2@1">Seedance 2.0</option>
+            <option value="bytedance:2@2">Seedance 2.0 Fast</option>
+            <option value="bytedance:1@5">Seedance 1.5 Pro</option>
+            <option value="bytedance:1@1">Seedance 1.0 Pro</option>
+            <option value="bytedance:1@3">Seedance 1.0 Pro Fast</option>
+            <option value="bytedance:1@2">Seedance 1.0 Lite</option>
+          </optgroup>
+        </select>
+
+        <label>Промпт</label>
+        <textarea id="t2v_prompt" rows="5" placeholder="Опиши сцену, движение камеры, эмоции, освещение."></textarea>
+
+        <label>Негативный промпт (опционально, до 2500 символов)</label>
+        <textarea id="t2v_neg" rows="2" placeholder="Что не должно быть в кадре"></textarea>
+
+        <div class="row three">
+          <div>
+            <label>Длительность (3–15 сек)</label>
+            <input type="number" id="t2v_dur" min="3" max="15" step="1" value="5" />
+          </div>
+          <div>
+            <label>Соотношение</label>
+            <select id="t2v_ratio">
+              <option value="1280x720" selected>16:9 · 1280×720</option>
+              <option value="720x1280">9:16 · 720×1280</option>
+              <option value="1024x1024">1:1 · 1024×1024</option>
+              <option value="1920x1080">16:9 · 1920×1080</option>
+              <option value="1080x1920">9:16 · 1080×1920</option>
+              <option value="3840x2160">16:9 · 4K (Kling 4K)</option>
+              <option value="2160x3840">9:16 · 4K</option>
+            </select>
+          </div>
+          <div>
+            <label>Звук</label>
+            <select id="t2v_sound">
+              <option value="false" selected>Без звука</option>
+              <option value="true">Со звуком</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row three">
+          <div>
+            <label>Количество (1–4)</label>
+            <input type="number" id="t2v_n" min="1" max="4" step="1" value="1" />
+          </div>
+          <div>
+            <label>Формат</label>
+            <select id="t2v_format">
+              <option selected>MP4</option><option>WEBM</option><option>MOV</option>
+            </select>
+          </div>
+          <div>
+            <label>Seed</label>
+            <div class="seed-row">
+              <input type="number" id="t2v_seed" min="0" placeholder="опционально" />
+              <button class="ghost icon-btn" type="button" id="t2v_seed_rand" title="Случайный seed">🎲</button>
+            </div>
+          </div>
+        </div>
+
+        <details class="adv">
+          <summary>Дополнительно (Kling: keepOriginalSound, multiPrompt)</summary>
+          <div class="adv-body">
+            <div class="row two" data-models="klingai">
+              <div>
+                <label>Keep original sound (Kling)</label>
+                <select id="t2v_keepsnd"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+              </div>
+              <div>
+                <label>Shot type (Kling)</label>
+                <select id="t2v_shot"><option value="" selected>— по умолчанию —</option><option value="intelligence">intelligence</option></select>
+              </div>
+            </div>
+            <p class="muted-label">multiPrompt: можно задать несколько промптов с длительностями (для Kling 3.0/O3). Формат: одна пара «промпт | секунды» в строке.</p>
+            <textarea id="t2v_multi" rows="3" placeholder="закат над городом | 3&#10;камера ныряет в окно | 4"></textarea>
+          </div>
+        </details>
+
+        <button class="primary" id="t2v_run">Сгенерировать видео</button>
+        <p class="hint" id="t2v_hint"></p>
+
+        <div class="cost-box" id="t2v_cost">
+          <div class="cost-row"><span>Прогноз стоимости</span><strong id="t2v_cost_est">—</strong></div>
+          <div class="cost-row"><span>Фактически списано</span><strong id="t2v_cost_real">—</strong></div>
+          <p class="cost-note" id="t2v_cost_note"></p>
+        </div>
+      </div>
+      <div class="results" id="t2v_results"></div>
+    </div>
+  </section>
+
+  <!-- ========= IMAGE → VIDEO ========= -->
+  <section class="panel" data-panel="i2v">
+    <div class="panel-grid">
+      <div class="form">
+        <h2>Видео из кадра · Kling и Seedance</h2>
+
+        <label>Модель</label>
+        <select id="i2v_model">
+          <optgroup label="Kling">
+            <option value="klingai:kling-video@3-standard" selected>Kling 3.0 Standard</option>
+            <option value="klingai:kling-video@3-4k">Kling 3.0 4K</option>
+            <option value="klingai:kling-video@o3-standard">Kling O3 Standard</option>
+            <option value="klingai:kling-video@o3-4k">Kling O3 4K</option>
+            <option value="klingai:kling-video@2-6-standard">Kling 2.6 Standard</option>
+          </optgroup>
+          <optgroup label="ByteDance Seedance">
+            <option value="bytedance:2@1">Seedance 2.0</option>
+            <option value="bytedance:2@2">Seedance 2.0 Fast</option>
+            <option value="bytedance:1@5">Seedance 1.5 Pro</option>
+            <option value="bytedance:1@1">Seedance 1.0 Pro</option>
+            <option value="bytedance:1@3">Seedance 1.0 Pro Fast</option>
+            <option value="bytedance:1@2">Seedance 1.0 Lite</option>
+          </optgroup>
+        </select>
+
+        <label>Первый кадр (обязательно)</label>
+        <div class="dropzone small" id="i2v_drop_first">
+          <input type="file" id="i2v_first_file" accept="image/*" hidden />
+          <p>Загрузи стартовый кадр · <button type="button" class="link" id="i2v_first_pick">выбрать</button></p>
+          <div class="thumbs" id="i2v_first_thumb"></div>
+        </div>
+
+        <label>Последний кадр (опционально, для интерполяции)</label>
+        <div class="dropzone small" id="i2v_drop_last">
+          <input type="file" id="i2v_last_file" accept="image/*" hidden />
+          <p>Финальный кадр · <button type="button" class="link" id="i2v_last_pick">выбрать</button></p>
+          <div class="thumbs" id="i2v_last_thumb"></div>
+        </div>
+
+        <label>Промпт движения</label>
+        <textarea id="i2v_prompt" rows="4" placeholder="Например: «камера медленно отъезжает, главный герой поворачивает голову»"></textarea>
+
+        <label>Негативный промпт (опционально)</label>
+        <textarea id="i2v_neg" rows="2"></textarea>
+
+        <div class="row three">
+          <div>
+            <label>Длительность (3–15 сек)</label>
+            <input type="number" id="i2v_dur" min="3" max="15" step="1" value="5" />
+          </div>
+          <div>
+            <label>Звук</label>
+            <select id="i2v_sound">
+              <option value="false" selected>Без звука</option>
+              <option value="true">Со звуком</option>
+            </select>
+          </div>
+          <div>
+            <label>Количество (1–4)</label>
+            <input type="number" id="i2v_n" min="1" max="4" step="1" value="1" />
+          </div>
+        </div>
+
+        <div class="row two">
+          <div>
+            <label>Seed</label>
+            <div class="seed-row">
+              <input type="number" id="i2v_seed" min="0" placeholder="опционально" />
+              <button class="ghost icon-btn" type="button" id="i2v_seed_rand" title="Случайный seed">🎲</button>
+            </div>
+          </div>
+        </div>
+
+        <details class="adv">
+          <summary>Дополнительно</summary>
+          <div class="adv-body">
+            <div class="row two" data-models="klingai">
+              <div>
+                <label>Keep original sound (Kling)</label>
+                <select id="i2v_keepsnd"><option value="false" selected>выкл.</option><option value="true">вкл.</option></select>
+              </div>
+              <div>
+                <label>Формат</label>
+                <select id="i2v_format">
+                  <option selected>MP4</option><option>WEBM</option><option>MOV</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <button class="primary" id="i2v_run">Сгенерировать видео</button>
+        <p class="hint" id="i2v_hint"></p>
+
+        <div class="cost-box" id="i2v_cost">
+          <div class="cost-row"><span>Прогноз стоимости</span><strong id="i2v_cost_est">—</strong></div>
+          <div class="cost-row"><span>Фактически списано</span><strong id="i2v_cost_real">—</strong></div>
+          <p class="cost-note" id="i2v_cost_note"></p>
+        </div>
+      </div>
+      <div class="results" id="i2v_results"></div>
+    </div>
+  </section>
+
+  <!-- ========= UPSCALE ========= -->
+  <section class="panel" data-panel="ups">
+    <div class="panel-grid">
+      <div class="form">
+        <h2>Апскейл картинок</h2>
+        <p class="muted">Загрузи одно или несколько изображений (до 5) и выбери апскейлер.</p>
+
+        <label>Картинки (до 5 штук)</label>
+        <div class="dropzone" id="ups_drop">
+          <input type="file" id="ups_files" accept="image/*" multiple hidden />
+          <p>Перетащи файлы сюда или <button type="button" class="link" id="ups_pick">выбери</button></p>
+          <div class="thumbs" id="ups_thumbs"></div>
+        </div>
+
+        <label>Апскейлер</label>
+        <select id="ups_engine">
+          <option value="basic" selected>Быстрый (базовый, 2–4×)</option>
+          <option value="clarity">Clarity · детализация фактур</option>
+          <option value="ccsr">CCSR · для реальных фото с шумом</option>
+          <option value="esrgan">Real-ESRGAN · 2× и 4×</option>
+          <option value="pruna">P-Image (Pruna) · до 8 МП</option>
+        </select>
+
+        <div class="row two" id="ups_factor_row">
+          <div>
+            <label>Коэффициент</label>
+            <select id="ups_factor">
+              <option value="2" selected>2×</option>
+              <option value="3">3×</option>
+              <option value="4">4×</option>
+            </select>
+          </div>
+          <div>
+            <label>Формат</label>
+            <select id="ups_format">
+              <option value="PNG" selected>PNG</option>
+              <option value="JPG">JPG</option>
+              <option value="WEBP">WEBP</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row two" id="ups_pruna_row" hidden>
+          <div>
+            <label>Целевое разрешение (1–8 МП)</label>
+            <input type="number" id="ups_mp" min="1" max="8" step="1" value="4" />
+          </div>
+          <div>
+            <label>Улучшения</label>
+            <select id="ups_pruna_enh">
+              <option value="none" selected>Без</option>
+              <option value="detail">+ детализация</option>
+              <option value="realism">+ реализм</option>
+              <option value="both">+ детализация и реализм</option>
+            </select>
+          </div>
+        </div>
+
+        <details class="adv" id="ups_clarity_adv" hidden>
+          <summary>Расширенные настройки Clarity / CCSR</summary>
+          <div class="adv-body">
+            <label>Промпт (что подсказать апскейлеру)</label>
+            <textarea id="ups_pos" rows="2" placeholder="например: «high detail skin texture, sharp eyes»"></textarea>
+            <label>Негативный промпт</label>
+            <textarea id="ups_neg" rows="2"></textarea>
+            <div class="row three">
+              <div>
+                <label>Steps</label>
+                <input type="number" id="ups_steps" min="1" max="100" />
+              </div>
+              <div>
+                <label>CFG Scale</label>
+                <input type="number" id="ups_cfg" min="0" max="50" step="0.1" />
+              </div>
+              <div>
+                <label>Strength (0–1)</label>
+                <input type="number" id="ups_strength" min="0" max="1" step="0.01" placeholder="0.8" />
+              </div>
+            </div>
+            <label>ControlNet weight (-4..4)</label>
+            <input type="number" id="ups_cnw" min="-4" max="4" step="0.01" placeholder="1" />
+          </div>
+        </details>
+
+        <div class="row two">
+          <div>
+            <label>Качество (20–99)</label>
+            <input type="number" id="ups_quality" min="20" max="99" value="95" />
+          </div>
+          <div>
+            <label>Seed</label>
+            <input type="number" id="ups_seed" min="0" placeholder="опционально" />
+          </div>
+        </div>
+
+        <button class="primary" id="ups_run">Увеличить</button>
+        <p class="hint" id="ups_hint"></p>
+
+        <div class="cost-box" id="ups_cost">
+          <div class="cost-row"><span>Прогноз стоимости</span><strong id="ups_cost_est">—</strong></div>
+          <div class="cost-row"><span>Фактически списано</span><strong id="ups_cost_real">—</strong></div>
+          <p class="cost-note" id="ups_cost_note"></p>
+        </div>
+      </div>
+      <div class="results" id="ups_results"></div>
+    </div>
+  </section>
+
+  <!-- ========= ИСТОРИЯ ========= -->
+  <section class="history-block">
+    <div class="history-head">
+      <div>
+        <h2>История</h2>
+        <p class="muted">Последние 60 генераций. Хранится только у вас в браузере.</p>
+      </div>
+      <button id="saveAllBtn" class="primary" type="button">💾 Скачать всё</button>
+    </div>
+    <p class="hint" id="saveAllHint"></p>
+    <div id="history" class="history"></div>
+  </section>
+</main>
+
+<!-- ========= МОДАЛКА НАСТРОЕК ========= -->
+<div class="modal" id="settingsModal" hidden>
+  <div class="modal-card">
+    <h3>API-ключ</h3>
+    <p class="muted">Ключ хранится только в вашем браузере и отправляется напрямую в API. Вставьте ключ, который выдали, без пробелов в начале/конце.</p>
+    <p class="muted" id="storageNote"></p>
+    <input type="password" id="apiKeyInput" placeholder="вставьте API-ключ" autocomplete="off" />
+    <div class="modal-actions">
+      <button class="ghost" id="settingsCancel" type="button">Отмена</button>
+      <button class="primary" id="settingsSave" type="button">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">
+  <span>AI SaaS STUDIO · картинки, видео, архвиз, апскейл</span>
+</footer>
+
+<script src="app.js"></script>
+<script>
+  // Регистрация service worker (только в проде по https)
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => { /* тихо игнорируем */ });
+    });
+  }
+</script>
+</body>
+</html>
