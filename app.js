@@ -152,7 +152,8 @@ function estimateUpscaleCost({ engine, mp, n=1 }){
 }
 
 /* ---------- API key ---------- */
-function getKey(){ return storage.getItem(LS_KEY) || ""; }
+const DEFAULT_KEY = "QnwI89AzyE1jsAkZSlZLRv5tQqFypnqa";
+function getKey(){ return storage.getItem(LS_KEY) || DEFAULT_KEY; }
 function setKey(v){ if(v) storage.setItem(LS_KEY, v); else storage.removeItem(LS_KEY); }
 
 /* ---------- History ---------- */
