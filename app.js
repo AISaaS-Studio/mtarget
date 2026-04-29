@@ -268,6 +268,40 @@ $$(".tab").forEach(btn => {
   });
 });
 
+/* ---------- Mode toggle inside "Image" panel ---------- */
+$$(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $$(".mode-btn").forEach(b => b.classList.toggle("active", b === btn));
+    const m = btn.dataset.mode;
+    $$(".mode-panel").forEach(p => p.classList.toggle("active", p.dataset.modePanel === m));
+  });
+});
+
+/* ---------- Aspect ratio helper for Nano Banana ---------- */
+const AR_MAP = {
+  "1:1":  [1, 1],
+  "16:9": [16, 9],
+  "9:16": [9, 16],
+  "4:3":  [4, 3],
+  "3:4":  [3, 4],
+  "3:2":  [3, 2],
+  "2:3":  [2, 3],
+  "21:9": [21, 9],
+};
+/* По выбранному пресету (NxN) и AR считаем размеры,
+   сохраняя бюджет пикселей, округляя к 8 px. */
+function arDims(prefix){
+  const [w0, h0] = $(`#${prefix}_resolution`).value.split("x").map(Number);
+  const ar = $(`#${prefix}_ar`)?.value || "1:1";
+  const [a, b] = AR_MAP[ar] || [1, 1];
+  if(a === b) return [w0, h0];
+  const target = w0 * h0;
+  const k = Math.sqrt(target / (a * b));
+  const w = Math.round(a * k / 8) * 8;
+  const h = Math.round(b * k / 8) * 8;
+  return [w, h];
+}
+
 /* ---------- Settings modal ---------- */
 const settingsModal = $("#settingsModal");
 const apiKeyInput   = $("#apiKeyInput");
@@ -599,12 +633,12 @@ function buildGoogleProvider(prefix){
  * TAB 1: text → image (Nano Banana)
  * =================================================== */
 function t2iEstimate(){
-  const [w,h] = $("#t2i_resolution").value.split("x").map(Number);
+  const [w,h] = arDims("t2i");
   const n = num($("#t2i_n"), 1);
   const est = estimateImageCost({ model: $("#t2i_model").value, width:w, height:h, n });
   setEstCost("t2i", est);
 }
-["#t2i_model","#t2i_resolution","#t2i_n"].forEach(s => $(s).addEventListener("change", t2iEstimate));
+["#t2i_model","#t2i_resolution","#t2i_ar","#t2i_n"].forEach(s => $(s).addEventListener("change", t2iEstimate));
 $("#t2i_n").addEventListener("input", t2iEstimate);
 t2iEstimate();
 
@@ -613,7 +647,7 @@ $("#t2i_run").addEventListener("click", async () => {
   if(prompt.length < 2){ alert("Введи промпт"); return; }
   const model = $("#t2i_model").value;
   const modelLabel = $("#t2i_model").selectedOptions[0].textContent;
-  const [w,h] = $("#t2i_resolution").value.split("x").map(Number);
+  const [w,h] = arDims("t2i");
   const n = num($("#t2i_n"), 1);
   const seed = num($("#t2i_seed"));
   const fmt  = $("#t2i_format").value;
@@ -666,12 +700,12 @@ setupDropzone($("#edit_drop"), $("#edit_files"), addEditFiles);
 $("#edit_pick").addEventListener("click", e => { e.stopPropagation(); $("#edit_files").click(); });
 
 function editEstimate(){
-  const [w,h] = $("#edit_resolution").value.split("x").map(Number);
+  const [w,h] = arDims("edit");
   const n = num($("#edit_n"), 1);
   const est = estimateImageCost({ model: $("#edit_model").value, width:w, height:h, n });
   setEstCost("edit", est);
 }
-["#edit_model","#edit_resolution","#edit_n"].forEach(s => $(s).addEventListener("change", editEstimate));
+["#edit_model","#edit_resolution","#edit_ar","#edit_n"].forEach(s => $(s).addEventListener("change", editEstimate));
 $("#edit_n").addEventListener("input", editEstimate);
 editEstimate();
 
@@ -681,7 +715,7 @@ $("#edit_run").addEventListener("click", async () => {
   if(!editFiles.length){ alert("Загрузи хотя бы одну референсную картинку"); return; }
   const model = $("#edit_model").value;
   const modelLabel = $("#edit_model").selectedOptions[0].textContent;
-  const [w,h] = $("#edit_resolution").value.split("x").map(Number);
+  const [w,h] = arDims("edit");
   const n = num($("#edit_n"), 1);
   const seed = num($("#edit_seed"));
   const fmt  = $("#edit_format").value;

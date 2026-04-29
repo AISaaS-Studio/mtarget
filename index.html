@@ -40,8 +40,7 @@
 </header>
 
 <nav class="tabs" role="tablist">
-  <button class="tab active" data-tab="t2i" role="tab">🎨 Картинка из текста</button>
-  <button class="tab" data-tab="edit" role="tab">✏️ Редактирование</button>
+  <button class="tab active" data-tab="image" role="tab">🎨 Картинка</button>
   <button class="tab" data-tab="arch" role="tab">🏛 Архитектура и дизайн</button>
   <button class="tab" data-tab="t2v" role="tab">🎬 Видео из текста</button>
   <button class="tab" data-tab="i2v" role="tab">🎞 Видео из кадра</button>
@@ -49,8 +48,15 @@
 </nav>
 
 <main>
+  <!-- ========= IMAGE: text→image и edit объединены под одной вкладкой ========= -->
+  <section class="panel active" data-panel="image">
+    <div class="mode-toggle" role="tablist" aria-label="Режим">
+      <button type="button" class="mode-btn active" data-mode="t2i">Генерация</button>
+      <button type="button" class="mode-btn" data-mode="edit">Редактирование</button>
+    </div>
+
   <!-- ========= TEXT → IMAGE ========= -->
-  <section class="panel active" data-panel="t2i">
+  <section class="mode-panel active" data-mode-panel="t2i">
     <div class="panel-grid">
       <div class="form">
         <h2>Картинка из текста</h2>
@@ -70,6 +76,18 @@
           <option value="1024x1024" selected>1K · 1024×1024</option>
           <option value="2048x2048">2K · 2048×2048</option>
           <option value="4096x4096">4K · 4096×4096</option>
+        </select>
+
+        <label>Соотношение сторон</label>
+        <select id="t2i_ar">
+          <option value="1:1" selected>1:1 — квадрат</option>
+          <option value="16:9">16:9 — широкий</option>
+          <option value="9:16">9:16 — вертикаль (сторис)</option>
+          <option value="4:3">4:3</option>
+          <option value="3:4">3:4</option>
+          <option value="3:2">3:2</option>
+          <option value="2:3">2:3</option>
+          <option value="21:9">21:9 — сверхширокий</option>
         </select>
 
         <div class="row three">
@@ -153,7 +171,7 @@
   </section>
 
   <!-- ========= IMAGE → IMAGE ========= -->
-  <section class="panel" data-panel="edit">
+  <section class="mode-panel" data-mode-panel="edit">
     <div class="panel-grid">
       <div class="form">
         <h2>Редактирование картинки по референсу</h2>
@@ -180,6 +198,18 @@
           <option value="1024x1024" selected>1K · 1024×1024</option>
           <option value="2048x2048">2K · 2048×2048</option>
           <option value="4096x4096">4K · 4096×4096</option>
+        </select>
+
+        <label>Соотношение сторон</label>
+        <select id="edit_ar">
+          <option value="1:1" selected>1:1 — квадрат</option>
+          <option value="16:9">16:9 — широкий</option>
+          <option value="9:16">9:16 — вертикаль (сторис)</option>
+          <option value="4:3">4:3</option>
+          <option value="3:4">3:4</option>
+          <option value="3:2">3:2</option>
+          <option value="2:3">2:3</option>
+          <option value="21:9">21:9 — сверхширокий</option>
         </select>
 
         <div class="row three">
@@ -260,6 +290,8 @@
       </div>
       <div class="results" id="edit_results"></div>
     </div>
+  </section>
+
   </section>
 
   <!-- ========= ARCH ========= -->

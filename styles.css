@@ -282,3 +282,20 @@ code{background:#0e1119;padding:1px 6px;border-radius:6px;border:1px solid var(-
 .cost-note{
   margin:6px 0 0;font-size:11px;color:var(--muted);line-height:1.4;
 }
+
+/* ===== Mode toggle (Генерация / Редактирование) ===== */
+.mode-toggle{
+  display:inline-flex;background:#11141c;border:1px solid #1f2330;
+  border-radius:10px;padding:4px;gap:4px;margin:0 0 16px;
+}
+.mode-btn{
+  background:transparent;color:var(--muted);border:0;cursor:pointer;
+  padding:8px 16px;border-radius:7px;font-size:14px;font-weight:500;
+  transition:background .15s, color .15s;
+}
+.mode-btn:hover{color:var(--text)}
+.mode-btn.active{
+  background:rgba(255,216,77,.12);color:var(--accent);
+}
+.mode-panel{display:none}
+.mode-panel.active{display:block}
