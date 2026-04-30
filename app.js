@@ -277,29 +277,45 @@ $$(".mode-btn").forEach(btn => {
   });
 });
 
-/* ---------- Aspect ratio helper for Nano Banana ---------- */
+/* ---------- Aspect ratio for Nano Banana ----------
+   API принимает только фиксированный список пар width/height.
+   Из этого списка выбираем ближайшую пару к выбранному AR и бюджету пикселей. */
+const NB_DIMS = [
+  [1024,1024],[2048,2048],[4096,4096],
+  [1264,848],[2528,1696],[5096,3392],
+  [5056,3392],[848,1264],[1696,2528],[3392,5096],
+  [3392,5056],[1200,896],[2400,1792],[4800,3584],
+  [896,1200],[1792,2400],[3584,4800],
+  [928,1152],[1856,2304],[3712,4608],
+  [1152,928],[2304,1856],[4608,3712],[768,1376],[1536,2752],
+  [3072,5504],[1376,768],[2752,1536],[5504,3072],
+  [1584,672],[3168,1344],[6336,2688],
+];
 const AR_MAP = {
-  "1:1":  [1, 1],
-  "16:9": [16, 9],
-  "9:16": [9, 16],
-  "4:3":  [4, 3],
-  "3:4":  [3, 4],
-  "3:2":  [3, 2],
-  "2:3":  [2, 3],
-  "21:9": [21, 9],
+  "1:1":  1,
+  "16:9": 16/9,
+  "9:16": 9/16,
+  "4:3":  4/3,
+  "3:4":  3/4,
+  "3:2":  3/2,
+  "2:3":  2/3,
+  "21:9": 21/9,
 };
-/* По выбранному пресету (NxN) и AR считаем размеры,
-   сохраняя бюджет пикселей, округляя к 8 px. */
+/* По выбранному пресету и AR выбираем ближайшую из разрешённых пар */
 function arDims(prefix){
   const [w0, h0] = $(`#${prefix}_resolution`).value.split("x").map(Number);
-  const ar = $(`#${prefix}_ar`)?.value || "1:1";
-  const [a, b] = AR_MAP[ar] || [1, 1];
-  if(a === b) return [w0, h0];
-  const target = w0 * h0;
-  const k = Math.sqrt(target / (a * b));
-  const w = Math.round(a * k / 8) * 8;
-  const h = Math.round(b * k / 8) * 8;
-  return [w, h];
+  const arKey = $(`#${prefix}_ar`)?.value || "1:1";
+  const targetAR = AR_MAP[arKey] || 1;
+  const targetPx = w0 * h0;
+  /* Среди кандидатов с ближайшим AR — отбираем ближайший по площади. */
+  let best = NB_DIMS[0], bestScore = Infinity;
+  for(const [w, h] of NB_DIMS){
+    const arDiff = Math.abs(Math.log((w/h) / targetAR));
+    const pxDiff = Math.abs(Math.log((w*h) / targetPx));
+    const score  = arDiff * 4 + pxDiff;
+    if(score < bestScore){ bestScore = score; best = [w, h]; }
+  }
+  return best;
 }
 
 /* ---------- Settings modal ---------- */
