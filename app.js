@@ -648,6 +648,24 @@ function buildGoogleProvider(prefix){
 /* ===================================================
  * TAB 1: text → image (Nano Banana)
  * =================================================== */
+const t2iFiles = [];
+function renderT2iThumbs(){
+  const wrap = $("#t2i_thumbs"); wrap.innerHTML = "";
+  t2iFiles.forEach((f, i) => {
+    wrap.appendChild(makeThumb(f.dataURL, () => { t2iFiles.splice(i,1); renderT2iThumbs(); }));
+  });
+}
+async function addT2iFiles(files){
+  for(const f of files.slice(0, 14 - t2iFiles.length)){
+    if(f.size > 10 * 1024 * 1024){ alert(`${f.name}: больше 10 МБ — пропускаю`); continue; }
+    const dataURL = await fileToDataURL(f);
+    t2iFiles.push({ name: f.name, dataURL });
+  }
+  renderT2iThumbs();
+}
+setupDropzone($("#t2i_drop"), $("#t2i_files"), addT2iFiles);
+$("#t2i_pick").addEventListener("click", e => { e.stopPropagation(); $("#t2i_files").click(); });
+
 function t2iEstimate(){
   const [w,h] = arDims("t2i");
   const n = num($("#t2i_n"), 1);
@@ -682,6 +700,9 @@ $("#t2i_run").addEventListener("click", async () => {
     outputQuality: q,
     width: w, height: h,
   };
+  if(t2iFiles.length){
+    task.inputs = { referenceImages: t2iFiles.map(f => f.dataURL) };
+  }
   if(seed !== null) task.seed = seed;
   const settings = buildGoogleSettings("t2i");
   if(settings) task.settings = settings;

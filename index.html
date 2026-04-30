@@ -70,6 +70,13 @@
         <label>Промпт</label>
         <textarea id="t2i_prompt" rows="5" placeholder="Опиши, что должно быть на картинке. Можно по-русски."></textarea>
 
+        <label>Референсы (опционально, до 14)</label>
+        <div class="dropzone" id="t2i_drop">
+          <input type="file" id="t2i_files" accept="image/*" multiple hidden />
+          <p>Перетащи файлы сюда или <button type="button" class="link" id="t2i_pick">выбери</button></p>
+          <div class="thumbs" id="t2i_thumbs"></div>
+        </div>
+
         <label>Разрешение (Nano Banana работает по пресетам)</label>
         <select id="t2i_resolution">
           <option value="512x512">512×512 (быстро и дёшево)</option>
